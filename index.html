@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Das Wir wächst</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600;800;900&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#eef6e4;--card:#fffdf6;--ink:#24432b;--green-d:#4a9a4f;--line:#cfe5bd;--bad:#f3dcc9;--sun:#ffe9a8;--ok:#d6f0c4;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#17261a;--card:#223427;--ink:#eaf6e0;--line:#3a5a40;--bad:#4a3a2c;--sun:#4d4524;--ok:#2f5a33}}
+:root[data-theme="dark"]{--bg:#17261a;--card:#223427;--ink:#eaf6e0;--line:#3a5a40;--bad:#4a3a2c;--sun:#4d4524;--ok:#2f5a33}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:'Nunito','Trebuchet MS',sans-serif;font-weight:700;font-size:20px;line-height:1.35}
+main{max-width:760px;margin:0 auto;padding:12px 14px 28px}
+h1{font-size:26px;font-weight:900;margin:4px 0 0;text-align:center}
+.top{display:flex;flex-direction:column;align-items:center}
+#wir{width:min(230px,58vw);height:auto;overflow:visible}
+#wg{transition:transform .8s cubic-bezier(.3,1.4,.5,1);transform-origin:120px 300px}
+.fl{transform:scale(0);transition:transform 1.1s cubic-bezier(.3,1.5,.5,1)}
+.fl.on{transform:scale(1)}
+.spr{transition:opacity .4s}
+#mo{transition:d .6s}
+.card{background:var(--card);border:3px solid var(--line);border-radius:28px;padding:16px;margin-top:6px}
+#sc{display:block;width:100%;height:auto;border-radius:20px;filter:grayscale(.95) contrast(.9);transition:filter 1.2s}
+#sc.warm{filter:none}
+#cap{margin:8px 2px 0;text-align:center;font-size:18px}
+.row{display:flex;gap:10px;align-items:center;margin:10px 2px}
+.row p{margin:0;flex:1;font-size:22px;font-weight:800}
+button{font:inherit;color:inherit;cursor:pointer}
+.say{flex:none;width:56px;height:56px;border-radius:50%;border:3px solid var(--green-d);background:var(--ok);font-size:26px}
+.opts{display:grid;gap:10px}
+.opt{display:flex;align-items:center;gap:12px;text-align:left;background:var(--card);border:3px solid var(--line);border-radius:22px;padding:10px 14px;min-height:68px;font-size:20px}
+.opt .ic{font-size:32px;flex:none}
+.opt:hover{border-color:var(--green-d)}
+.opt.no{background:var(--bad);animation:wob .4s;opacity:.85}
+.opt.yes{background:var(--ok);border-color:var(--green-d)}
+.opt:disabled{cursor:default}
+:focus-visible{outline:4px solid #f0a020;outline-offset:2px}
+@keyframes wob{25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+#msg{min-height:58px;margin-top:12px;font-size:21px;font-weight:800;text-align:center}
+.go{display:block;margin:6px auto 0;border:0;border-radius:999px;background:var(--green-d);color:#fff;font-weight:900;font-size:22px;padding:14px 34px}
+.prog{display:flex;gap:8px;justify-content:center;margin:6px 0 2px}
+.prog i{width:16px;height:16px;border-radius:50%;background:var(--line);transition:background .4s}
+.prog i.on{background:var(--green-d)}
+.end{text-align:center}
+@media (prefers-reduced-motion:reduce){.fl,#wg,#sc{transition:none}.opt.no{animation:none}}
+</style>
+</head>
+<body>
+<main>
+<div class="top">
+<h1>Das Wir wächst</h1>
+<svg id="wir" viewBox="-10 -40 260 350" role="img" aria-label="Das grüne Wir mit rot-weiß gestreifter Nase und Blumen auf dem Kopf"></svg>
+<div class="prog" id="prog" aria-hidden="true"></div>
+</div>
+<section class="card" id="stage"></section>
+</main>
+<script>
+const SK=["#f5cfa0","#d9a066","#8a5a3b","#f0c08a"];
+function kid(x,y,s,sh,hr,m,a,ex,sit,hs){a=a||[-17,50,17,50];hs=hs||0;
+const mo={happy:'<path d="M-5 9q5 6 10 0"/><path d="M-9-7q3-2 6 0M3-7q3-2 6 0"/>',sad:'<path d="M-5 12q5-5 10 0"/><path d="M-9-6l6-2M9-6l-6-2"/>',cry:'<path d="M-9-6l6-2M9-6l-6-2"/><ellipse cx="0" cy="11" rx="4" ry="3.5" fill="#7a2a2a" stroke="none"/><path d="M-6 4q-3 9 0 13M6 4q3 9 0 13" stroke="#5aa9e6" stroke-width="2.6"/>',angry:'<path d="M-5 11h10"/><path d="M-9-7l6 3M9-7l-6 3"/>',flat:'<path d="M-4 11h8"/><path d="M-9-6h6M3-6h6"/>',open:'<ellipse cx="0" cy="10" rx="4.5" ry="5" fill="#7a2a2a" stroke="none"/><path d="M-9-7l6 3M9-7l-6 3"/>'}[m];
+const P='#3f5278',shoe='#2b2b2b';
+const legs=sit==1?`<path d="M-4 54h30M-4 54h30" stroke="${P}" stroke-width="10" stroke-linecap="round"/><ellipse cx="29" cy="54" rx="4" ry="6" fill="${shoe}"/>`:sit==2?`<path d="M-4 54h22v30M0 56h22v30" fill="none" stroke="${P}" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"/><ellipse cx="24" cy="87" rx="7" ry="3.5" fill="${shoe}"/>`:`<path d="M-7 50v36M7 50v36" stroke="${P}" stroke-width="9" stroke-linecap="round"/><ellipse cx="-8" cy="89" rx="8" ry="3.5" fill="${shoe}"/><ellipse cx="8" cy="89" rx="8" ry="3.5" fill="${shoe}"/>`;
+const arm=(sx,h)=>{const px=sx+(h[0]-sx)*.4,py=22+(h[1]-22)*.4;return `<path d="M${sx} 22Q${(sx+h[0])/2+(sx<0?-3:3)} ${(22+h[1])/2+3} ${h[0]} ${h[1]}" fill="none" stroke="${s}" stroke-width="6" stroke-linecap="round"/><path d="M${sx} 22L${px} ${py}" stroke="${sh}" stroke-width="8" stroke-linecap="round"/><circle cx="${h[0]}" cy="${h[1]}" r="3.6" fill="${s}"/>`};
+const back=hs==1?`<path d="M-15-4Q-19 30-8 31H8Q19 30 15-4z" fill="${hr}"/>`:'';
+const cap=`<path d="M-14.5 1C-16-14-8-19 0-19S16-14 14.5 1Q8-7 0-8Q-8-7-14.5 1z" fill="${hr}"/>`+(hs==2?`<ellipse cx="16" cy="8" rx="4" ry="9" fill="${hr}" transform="rotate(-20 16 8)"/>`:'');
+return `<g transform="translate(${x},${y})"><ellipse cx="${sit==1?10:0}" cy="${sit==1?60:90}" rx="${sit==1?38:22}" ry="5" fill="#000" opacity=".15"/>${legs}${back}<rect x="-4" y="12" width="8" height="9" fill="${s}"/><path d="M-15 19q0-5 6-6h18q6 1 6 6v33h-30z" fill="${sh}"/>${arm(-14,a.slice(0,2))}${arm(14,a.slice(2))}<circle cx="-13.5" cy="2" r="3" fill="${s}"/><circle cx="13.5" cy="2" r="3" fill="${s}"/><ellipse rx="13.5" ry="15.5" fill="${s}"/>${cap}<ellipse cx="-5.5" cy="0" rx="3" ry="3.3" fill="#fff"/><ellipse cx="5.5" cy="0" rx="3" ry="3.3" fill="#fff"/><circle cx="-5.5" cy=".5" r="1.8" fill="#3a2a1a"/><circle cx="5.5" cy=".5" r="1.8" fill="#3a2a1a"/><path d="M0 3q2 4-1 5" fill="none" stroke="#b9855c" stroke-width="1.3"/><circle cx="-8.5" cy="6" r="3" fill="#f08a8a" opacity=".3"/><circle cx="8.5" cy="6" r="3" fill="#f08a8a" opacity=".3"/><g fill="none" stroke="#5a2f2f" stroke-width="2" stroke-linecap="round">${mo}</g>${ex||''}</g>`}
+const DEFS='<defs><linearGradient id="sk" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#8ec9ee"/><stop offset="1" stop-color="#d9f0fc"/></linearGradient></defs>';
+const Y=DEFS+'<rect width="300" height="170" fill="url(#sk)"/><circle cx="40" cy="28" r="13" fill="#ffe27a"/><rect x="160" y="58" width="140" height="62" fill="#d9a07a"/><rect x="156" y="52" width="144" height="9" fill="#a85a40"/><g fill="#9fd0ea" stroke="#fff" stroke-width="2"><rect x="170" y="72" width="20" height="20"/><rect x="204" y="72" width="20" height="20"/><rect x="238" y="72" width="20" height="20"/></g><rect x="278" y="76" width="6" height="44" fill="#7a5230"/><circle cx="281" cy="66" r="22" fill="#4f9a49"/><circle cx="270" cy="76" r="14" fill="#5fae58"/><rect y="118" width="300" height="52" fill="#86c26a"/><rect y="124" width="300" height="46" fill="#a9a9a4"/>';
+const C=DEFS+'<rect width="300" height="170" fill="#f3e6c8"/><rect x="14" y="20" width="120" height="56" fill="#2f5d46" stroke="#8a6a44" stroke-width="4"/><path d="M26 40q10-8 20 0t20 0M26 56h60" fill="none" stroke="#e8f0e0" stroke-width="2" opacity=".8"/><rect x="196" y="22" width="76" height="54" fill="#bfe3f5" stroke="#8a6a44" stroke-width="4"/><path d="M234 22v54M196 49h76" stroke="#8a6a44" stroke-width="3"/><rect y="120" width="300" height="50" fill="#c9a06a"/><path d="M0 138h300M0 156h300" stroke="#b78d57" stroke-width="2"/>';
+const HEART=(x,y)=>`<text x="${x}" y="${y}" font-size="24" text-anchor="middle">❤️</text>`;
+const BUB=(x,t,c)=>{const r=Math.max(24,6+t.length*4.4);return `<ellipse cx="${x}" cy="14" rx="${r}" ry="12" fill="#fff" stroke="#bbb"/><text x="${x}" y="19" text-anchor="middle" font-size="14" font-weight="900" fill="${c||'#555'}">${t}</text>`};
+const SW=w=>`<rect x="${-w/2}" y="24" width="${w}" height="9" rx="3" fill="#e8b86a"/><rect x="${-w/2}" y="24" width="${w}" height="3" rx="1.5" fill="#6bbf59"/>`;
+const LBE='<rect x="-14" y="26" width="28" height="15" rx="3" fill="#4a9ad8"/><rect x="-11" y="29" width="22" height="9" fill="#fff"/>';
+const BALL=(x,y)=>`<circle cx="${x}" cy="${y}" r="10" fill="#f28c3a" stroke="#c0601a" stroke-width="2"/><path d="M${x-10} ${y}h20M${x} ${y-10}v20" stroke="#c0601a" stroke-width="1.5"/>`;
+const SCOOT=x=>`<g transform="translate(${x},121)"><rect x="0" y="-5" width="36" height="5" fill="#e0453a"/><path d="M36-5l-6-24" stroke="#444" stroke-width="3"/><circle r="7" fill="#444"/><circle cx="36" r="7" fill="#444"/></g>`;
+const KNEE='<circle cx="22" cy="50" r="4.5" fill="#e0453a"/>',PLAST='<rect x="16" y="45" width="12" height="9" rx="2" fill="#f7e2c4" stroke="#b99" stroke-width="1"/>';
+const DOOR='<path d="M4 40l41-26 41 26z" fill="#c8553d"/><rect x="10" y="40" width="70" height="86" fill="#e7b88a"/><rect x="32" y="70" width="26" height="56" fill="#8a5a3b"/>';
+const BAG=x=>`<rect x="${x-24}" y="58" width="12" height="26" rx="4" fill="#e0453a"/>`;
+const RUG='<ellipse cx="150" cy="146" rx="140" ry="18" fill="#d98a5a" opacity=".8"/>';
+const PEN='<path d="M17 50l8-8" stroke="#2a6fd0" stroke-width="3" stroke-linecap="round"/>',STONE='<ellipse cx="17" cy="53" rx="7" ry="5" fill="#8a8a8a"/>';
+const SLIDE='<rect x="238" y="44" width="30" height="6" fill="#d9534f"/><path d="M242 50v72M264 50v72M242 66h22M242 84h22M242 102h22" stroke="#888" stroke-width="3"/><path d="M268 48l28 70" stroke="#f0b429" stroke-width="11" stroke-linecap="round"/>';
+const BENCH='<rect x="36" y="64" width="100" height="6" rx="2" fill="#a0703c"/><rect x="36" y="90" width="100" height="8" rx="3" fill="#a0703c"/><rect x="44" y="98" width="6" height="26" fill="#7a5230"/><rect x="122" y="98" width="6" height="26" fill="#7a5230"/>';
+const BOOKS=[[70,127,'#d9534f'],[105,134,'#4a7fd0'],[135,128,'#f2b134'],[172,135,'#58b368'],[208,128,'#9b6ad8'],[240,134,'#4a9ad8']].map(([x,y,c])=>`<rect x="${x}" y="${y}" width="20" height="6" rx="1" fill="${c}"/>`).join('');
+const BOX='<rect x="118" y="112" width="64" height="24" rx="3" fill="#b98a55"/><rect x="124" y="106" width="16" height="8" fill="#d9534f"/><rect x="144" y="104" width="16" height="10" fill="#4a7fd0"/><rect x="164" y="107" width="12" height="7" fill="#f2b134"/>';
+const WR=[-17,50,28,-8],WL=[-28,-8,17,50],HOLD=[-9,31,9,31],FACE=[-8,12,8,12],ER=[-17,50,19,3],EL=[-19,3,17,50],XA=[10,36,-10,36],DN=[-17,50,17,50],PICK=[-12,76,12,76];
+const S=[
+{text:"Mia ist hingefallen. Sie sitzt auf dem Boden und weint. Ihr Knie tut weh.",
+b:Y+SCOOT(180)+kid(95,74,SK[0],'#e8607a','#6b3a1e','cry',FACE,KNEE,1,1)+kid(250,42,SK[1],'#4a7fd0','#222','flat'),
+a:Y+SCOOT(210)+kid(105,74,SK[0],'#e8607a','#6b3a1e','happy',[-17,50,28,30],PLAST,1,1)+kid(152,42,SK[1],'#4a7fd0','#222','happy',[-29,56,17,50])+HEART(130,36),
+o:[["🚶","Ich gehe weg.",0],["🤗","Ich helfe Mia und frage: Geht es dir gut?",1],["😆","Ich lache.",0]],good:"Ja! Mia fühlt sich nicht allein. Das Wir wächst!"},
+{text:"Ben hat sein Pausenbrot vergessen. Seine Brotdose ist leer. Er hat Hunger.",
+b:Y+kid(90,42,SK[2],'#f2b134','#222','sad',HOLD,LBE)+BUB(90,'grrr')+kid(220,42,SK[0],'#58b368','#c0622d','happy',HOLD,SW(18),0,1),
+a:Y+kid(120,42,SK[2],'#f2b134','#222','happy',HOLD,SW(12))+kid(180,42,SK[0],'#58b368','#c0622d','happy',HOLD,SW(12),0,1)+HEART(150,30),
+o:[["😋","Ich esse allein weiter.",0],["🍎","Ich teile mit Ben.",1],["👉","Ich sage: Selbst schuld!",0]],good:"Teilen macht froh. Das Wir wächst!"},
+{text:"Zwei Kinder wollen den Ball. Beide ziehen und schreien.",
+b:Y+kid(110,42,SK[0],'#e8607a','#6b3a1e','open',[-17,50,40,50],'',0,1)+kid(190,42,SK[3],'#4a7fd0','#222','open',[-40,50,17,50])+BALL(150,92)+'<path d="M135 72l-8-6M165 72l8-6M150 66v-10" stroke="#d33" stroke-width="3" stroke-linecap="round"/>',
+a:Y+kid(100,42,SK[0],'#e8607a','#6b3a1e','happy',[-17,50,34,24],'',0,1)+kid(195,42,SK[3],'#4a7fd0','#222','happy',HOLD)+BALL(195,73)+BUB(100,'Du!')+HEART(150,40),
+o:[["🔄","Wir wechseln uns ab.",1],["😠","Ich schreie.",0],["🏃","Ich renne mit dem Ball weg.",0]],good:"Abwechseln ist fair. Das Wir wächst!"},
+{text:"Ein neues Kind steht allein vor der Klasse. Die anderen lachen zusammen.",
+b:Y+DOOR+BAG(112)+kid(112,42,SK[3],'#9b6ad8','#222','sad')+BUB(112,'?')+kid(210,42,SK[0],'#58b368','#c0622d','happy',DN,'',0,1)+kid(252,42,SK[1],'#f2b134','#222','happy')+BUB(231,'haha'),
+a:Y+DOOR+BAG(100)+kid(100,42,SK[3],'#9b6ad8','#222','happy',WR)+kid(160,42,SK[0],'#58b368','#c0622d','happy',[-30,6,17,50],'',0,2)+BALL(131,50)+BUB(160,'⚽?')+kid(215,42,SK[1],'#f2b134','#222','happy',DN,'',0,1)+HEART(128,36),
+o:[["🙈","Ich tue, als sehe ich es nicht.",0],["💬","Ich flüstere über das Kind.",0],["👋","Ich sage Hallo: Spielst du mit?",1]],good:"Willkommen! Jetzt gehört das Kind dazu. Das Wir wächst!"},
+{text:"Lina erzählt im Stuhlkreis. Alle sollen zuhören, aber einer ruft dazwischen.",
+b:C+RUG+kid(55,42,SK[1],'#e8607a','#6b3a1e','sad',DN,STONE,0,1)+BUB(55,'…')+kid(150,42,SK[0],'#58b368','#c0622d','open')+BUB(150,'!!','#d33')+kid(245,42,SK[2],'#f2b134','#222','flat',[-17,50,17,50],PEN),
+a:C+RUG+kid(55,42,SK[1],'#e8607a','#6b3a1e','happy',DN,STONE,0,1)+BUB(55,'…')+kid(150,42,SK[0],'#58b368','#c0622d','happy',ER)+kid(245,42,SK[2],'#f2b134','#222','happy',EL)+HEART(150,30),
+o:[["🗣️","Ich rede dazwischen.",0],["🎒","Ich spiele mit meinem Stift.",0],["👂","Ich höre Lina zu.",1]],good:"Zuhören zeigt: Du bist mir wichtig. Das Wir wächst!"},
+{text:"Alle warten an der Rutsche in einer Reihe. Du möchtest auch rutschen.",
+b:Y+SLIDE+kid(215,42,SK[0],'#e8607a','#6b3a1e','flat',DN,'',0,1)+kid(175,42,SK[1],'#4a7fd0','#222','flat')+kid(135,42,SK[3],'#9b6ad8','#222','flat',DN,'',0,2)+BUB(80,'?'),
+a:Y+SLIDE+kid(215,42,SK[0],'#e8607a','#6b3a1e','happy',DN,'',0,1)+kid(175,42,SK[1],'#4a7fd0','#222','happy')+kid(135,42,SK[3],'#9b6ad8','#222','happy',DN,'',0,2)+kid(95,42,SK[2],'#f2b134','#222','happy',WR)+HEART(115,30),
+o:[["😠","Ich dränge mich vor.",0],["⏳","Ich stelle mich hinten an.",1],["🫸","Ich schubse die anderen weg.",0]],good:"Warten ist fair. Alle kommen dran. Das Wir wächst!"},
+{text:"Tom hat aus Versehen Sophies Stift kaputt gemacht. Sophie ist traurig.",
+b:C+kid(100,42,SK[1],'#e8607a','#6b3a1e','cry',FACE,'',0,1)+kid(190,42,SK[0],'#58b368','#c0622d','sad',HOLD,'<path d="M-12 30l8-3M4 33l8 3" stroke="#e0b030" stroke-width="3" stroke-linecap="round"/>'),
+a:C+kid(100,42,SK[1],'#e8607a','#6b3a1e','happy',[-17,50,22,34],'',0,1)+kid(165,42,SK[0],'#58b368','#c0622d','happy',[-30,34,17,50])+BUB(165,'Tut mir leid')+HEART(132,38),
+o:[["🙈","Ich verstecke den Stift.",0],["🙋","Ich sage: Tut mir leid.",1],["🤷","Ich sage: Das war ich nicht!",0]],good:"Entschuldigen tut gut. Das Wir wächst!"},
+{text:"Jonas sitzt in der Pause allein auf der Bank. Er schaut traurig.",
+b:Y+BENCH+kid(70,36,SK[2],'#f2b134','#222','sad',[-17,50,6,60],'',2)+kid(225,42,SK[0],'#58b368','#c0622d','happy',[-17,50,30,30],'',0,1)+kid(265,42,SK[3],'#4a7fd0','#222','happy')+BALL(246,66),
+a:Y+BENCH+kid(70,36,SK[2],'#f2b134','#222','happy',[-17,50,6,60],'',2)+kid(112,36,SK[1],'#e8607a','#6b3a1e','happy',[-17,50,6,60],'',2,1)+HEART(92,22),
+o:[["👀","Ich gucke weg.",0],["🪑","Ich setze mich dazu und frage: Spielst du mit?",1],["🏃","Ich laufe vorbei.",0]],good:"Jetzt ist Jonas nicht mehr allein. Das Wir wächst!"},
+{text:"Die Klasse räumt auf. Überall liegen Bücher. Nur ein Kind räumt.",
+b:C+BOOKS+kid(55,42,SK[1],'#e8607a','#6b3a1e','sad',PICK,'',0,1)+kid(150,42,SK[0],'#58b368','#c0622d','flat',XA)+kid(245,42,SK[2],'#f2b134','#222','flat',DN),
+a:C+BOX+kid(80,42,SK[1],'#e8607a','#6b3a1e','happy',PICK,'',0,1)+kid(150,34,SK[0],'#58b368','#c0622d','happy',[-12,58,12,58])+kid(220,42,SK[2],'#f2b134','#222','happy',PICK)+HEART(150,24),
+o:[["🚪","Ich gehe raus zum Spielen.",0],["🧹","Ich helfe mit.",1],["🙅","Ich sage: Das ist nicht meine Arbeit!",0]],good:"Zusammen geht es schnell. Das Wir wächst!"},
+{text:"Lara und Max haben sich gestritten. Beide sind böse und reden nicht mehr.",
+b:C+kid(110,42,SK[1],'#e8607a','#6b3a1e','angry',XA,'',0,1)+kid(190,42,SK[3],'#4a7fd0','#222','angry',XA)+'<text x="150" y="62" font-size="30" text-anchor="middle">💢</text>',
+a:C+kid(110,42,SK[1],'#e8607a','#6b3a1e','happy',[-17,50,36,34],'',0,1)+kid(190,42,SK[3],'#4a7fd0','#222','happy',[-36,34,17,50])+HEART(150,40),
+o:[["😤","Ich bleibe sauer.",0],["🤝","Ich sage: Entschuldigung. Vertragen wir uns?",1],["🗯️","Ich schimpfe weiter.",0]],good:"Vertragen macht alle froh. Das Wir wächst!"}
+];
+const FIN=Y+kid(60,42,SK[0],'#e8607a','#6b3a1e','happy',WR,'',0,1)+kid(120,42,SK[2],'#f2b134','#222','happy')+kid(180,42,SK[1],'#4a7fd0','#222','happy',WL)+kid(240,42,SK[3],'#9b6ad8','#222','happy',DN,'',0,2)+HEART(150,24);
+const COL=["#f27fa5","#ffcf3f","#ff9a4d","#b79cf0","#ef6a5b","#6ec6f0","#ffffff","#ff8fb8","#ffd36b","#c08cf0"];
+const PX=S.map((_,k)=>{const x=66+k*12,y=140-Math.sqrt(76*76-(x-120)**2);return[x,y,[22,40,26,44,28,46,28,42,24,38][k]]});
+const BAD=["Hmm. Wie fühlt sich das für das andere Kind an? Probier etwas anderes.","Oh. Das tut dem anderen Kind weh. Such eine freundliche Idee."];
+const svg=document.getElementById('wir');
+const mouth=n=>`M100 186 Q120 ${186+6+n*1.8} 140 186`;
+function build(){
+let h='<g id="wg">';
+let fz='';for(let a=0;a<360;a+=18){const r=a*Math.PI/180;fz+=`<circle cx="${(120+Math.cos(r)*76).toFixed(1)}" cy="${(140+Math.sin(r)*76).toFixed(1)}" r="14" fill="#79c164"/>`}
+let fb='';for(let a=0;a<360;a+=24){const r=a*Math.PI/180;fb+=`<circle cx="${(120+Math.cos(r)*48).toFixed(1)}" cy="${(262+Math.sin(r)*34).toFixed(1)}" r="12" fill="#79c164"/>`}
+h+=`<ellipse cx="86" cy="296" rx="22" ry="11" fill="#6cb75a"/><ellipse cx="154" cy="296" rx="22" ry="11" fill="#6cb75a"/>${fb}<ellipse cx="120" cy="262" rx="50" ry="36" fill="#8fd078"/><ellipse cx="120" cy="272" rx="28" ry="22" fill="#c4eaa9"/>
+<circle cx="64" cy="252" r="15" fill="#79c164"/><circle cx="176" cy="252" r="15" fill="#79c164"/>
+<circle cx="50" cy="104" r="20" fill="#79c164"/><circle cx="190" cy="104" r="20" fill="#79c164"/>${fz}<circle cx="120" cy="140" r="76" fill="#8fd078"/>
+<clipPath id="nz"><ellipse cx="120" cy="152" rx="30" ry="23"/></clipPath>
+<ellipse cx="120" cy="152" rx="30" ry="23" fill="#ffffff"/><g clip-path="url(#nz)" fill="#e0453a"><rect x="85" y="136" width="70" height="5"/><rect x="85" y="146" width="70" height="5"/><rect x="85" y="156" width="70" height="5"/><rect x="85" y="166" width="70" height="5"/></g>
+<ellipse cx="120" cy="152" rx="30" ry="23" fill="none" stroke="#b8322a" stroke-width="3"/>
+<circle cx="86" cy="118" r="12" fill="#24432b"/><circle cx="154" cy="118" r="12" fill="#24432b"/><circle cx="90" cy="113" r="4.5" fill="#fff"/><circle cx="158" cy="113" r="4.5" fill="#fff"/>
+<circle cx="66" cy="158" r="9" fill="#f6b6c4" opacity=".75"/><circle cx="174" cy="158" r="9" fill="#f6b6c4" opacity=".75"/>
+<path id="mo" d="${mouth(0)}" fill="none" stroke="#24432b" stroke-width="5" stroke-linecap="round"/>`;
+PX.forEach(([x,y,L],i)=>{
+h+=`<g class="spr" id="sp${i}"><path d="M${x} ${y+4}q-3-12-12-14 2 10 12 14M${x} ${y+4}q3-12 12-14-2 10-12 14" fill="#4a9a4f"/></g>`;
+let p="";for(let k=0;k<6;k++){const a=k*60*Math.PI/180;p+=`<circle cx="${(x+Math.cos(a)*7).toFixed(1)}" cy="${(y-L+Math.sin(a)*7).toFixed(1)}" r="5.5" fill="${COL[i]}"/>`}
+h+=`<g class="fl" id="fl${i}" style="transform-origin:${x}px ${y+4}px"><path d="M${x} ${y+4}V${y-L}" stroke="#3f8a45" stroke-width="4" stroke-linecap="round"/><path d="M${x} ${y-L*0.4}q12-10 19-3-9 9-19 3" fill="#4a9a4f"/>${p}<circle cx="${x}" cy="${y-L}" r="4" fill="#fff3b0"/></g>`});
+svg.innerHTML=h+'</g>';
+}
+function wirState(){document.getElementById('wg').style.transform=`scale(${1-0.07*Math.min(wrong,3)})`}
+let i=0,grown=0,done=false,wrong=0;
+const stage=document.getElementById('stage'),prog=document.getElementById('prog');
+function dots(){prog.innerHTML=S.map((_,k)=>`<i class="${k<grown?'on':''}"></i>`).join('')}
+function say(t){try{speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(t);u.lang='de-DE';u.rate=.85;speechSynthesis.speak(u)}catch(e){}}
+function show(){
+done=false;dots();wirState();document.getElementById('mo').setAttribute('d',mouth(grown));const s=S[i];
+const opts=s.o.map((o,k)=>`<button class="opt" data-k="${k}"><span class="ic">${o[0]}</span><span>${o[1]}</span></button>`).join('');
+stage.innerHTML=`<svg id="sc" viewBox="0 0 300 170" role="img" aria-label="${s.text}">${s.b}</svg><p id="cap">Alles ist grau. Das Wir fehlt.</p>
+<div class="row"><button class="say" id="sayBtn" aria-label="Vorlesen">🔊</button><p>${s.text}</p></div>
+<p style="margin:4px 2px 8px">Was kannst du tun?</p><div class="opts">${opts}</div><div id="msg" role="status" aria-live="polite"></div><div id="nx"></div>`;
+document.getElementById('sayBtn').onclick=()=>say(s.text+' Alles ist grau. Das Wir fehlt. Was kannst du tun? '+s.o.map((o,k)=>`${k+1}: ${o[1]}`).join(' '));
+stage.querySelectorAll('.opt').forEach(b=>b.onclick=()=>pick(b,s));
+}
+function pick(b,s){
+if(done)return;const o=s.o[b.dataset.k],msg=document.getElementById('msg');
+if(o[2]){
+done=true;grown++;wrong=0;b.classList.add('yes');stage.querySelectorAll('.opt').forEach(x=>x.disabled=true);
+const sc=document.getElementById('sc');sc.innerHTML=s.a;sc.classList.add('warm');
+document.getElementById('cap').textContent='Jetzt ist es bunt. Das Wir ist da!';
+document.getElementById('fl'+i).classList.add('on');document.getElementById('sp'+i).style.opacity=0;
+wirState();document.getElementById('mo').setAttribute('d',mouth(grown));dots();msg.textContent='🌸 '+s.good;
+const last=i===S.length-1;
+document.getElementById('nx').innerHTML=`<button class="go" id="go">${last?'Fertig':'Weiter'}</button>`;
+document.getElementById('go').onclick=()=>{if(last)end();else{i++;show()}};
+document.getElementById('go').focus();
+}else{
+b.classList.remove('no');void b.offsetWidth;b.classList.add('no');b.disabled=true;
+msg.textContent=BAD[wrong%2];wrong++;wirState();document.getElementById('mo').setAttribute('d',mouth(-2));
+}}
+function end(){
+stage.innerHTML=`<div class="end"><svg id="sc" class="warm" viewBox="0 0 300 170" role="img" aria-label="Fröhliche Klasse">${FIN}</svg>
+<p style="font-size:26px;font-weight:900;margin:14px 0 6px">Super! Das Wir blüht! 🌼</p>
+<p style="margin:0 0 10px">Ihr habt zusammen gute Ideen gefunden.</p>
+<p style="background:var(--sun);border-radius:18px;padding:12px;margin:0 0 6px">Erzähl: Wann hast du heute jemandem geholfen?</p>
+<button class="go" id="again">Nochmal spielen</button></div>`;
+document.getElementById('again').onclick=()=>{i=0;grown=0;wrong=0;build();show()};
+say('Super! Das Wir blüht! Ihr habt zusammen gute Ideen gefunden.');
+}
+build();show();
+</script>
+</body>
+</html>
